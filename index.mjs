@@ -5,7 +5,7 @@ import _traverse from '@babel/traverse';
 const traverse = _traverse.default;
 
 function getAllExportedFunctions(dirPath) {
-  const files = fs.readdirSync(dirPath);
+  const files = fs.readdirSync(dirPath, { recursive: true });
 
   let exportedFunctions = [];
 
@@ -13,9 +13,7 @@ function getAllExportedFunctions(dirPath) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
 
-    if (stats.isDirectory()) {
-      exportedFunctions.push(...getAllExportedFunctions(filePath));
-    } else if (path.extname(filePath) === '.js') {
+    if (stats.isFile() && path.extname(filePath) === '.js') {
       exportedFunctions.push(...getExportedFunctions(filePath));
     }
   }
@@ -49,25 +47,18 @@ function getExportedFunctions(filePath) {
   return exportedFunctions;
 }
 
-
-function searchFunctionCallInDirectory(dirPath, { functionName, fileName }) {
-  const files = fs.readdirSync(dirPath);
+  const files = fs.readdirSync(dirPath, { recursive: true });
 
   for (const file of files) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
+    if (stats.isDirectory() || path.extname(filePath) !== '.js') {
+      continue;
+    }
+    const functionCalled = searchFileForFunctionCalls(filePath, { functionName, fileName });
 
-    if (stats.isDirectory()) {
-      const result = searchFunctionCallInDirectory(filePath, { functionName, fileName });
-      if (result) {
-        return true;
-      }
-    } else if (path.extname(filePath) === '.js') {
-      const functionCalled = searchFileForFunctionCalls(filePath, { functionName, fileName });
-
-      if (functionCalled) {
-        return true;
-      }
+    if (functionCalled) {
+      return true;
     }
   }
 
