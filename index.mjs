@@ -101,7 +101,7 @@ function searchFileForFunctionCalls(filePath, { fileName, functionName }) {
 function main() {
   const args = process.argv.slice(2);
   if (args.length !== 2) {
-    console.error('Veuillez fournir les chemins absolus des dossiers.');
+    console.error('Il faut 2 arguments: le chemin vers le dossier des fonctions et le chemin vers le dossier de recherche.');
     process.exit(1);
   }
 
