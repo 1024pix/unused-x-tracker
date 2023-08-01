@@ -1,0 +1,15 @@
+{
+  "name": "ast-explorer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "1024pix",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "@babel/parser": "^7.22.7",
+    "@babel/traverse": "^7.22.8"
+  }
+}
