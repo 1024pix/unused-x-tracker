@@ -74,15 +74,7 @@ function isCalledInFile(filePath, { fileName, functionName }) {
   return functionCalled;
 }
 
-function main() {
-  const args = process.argv.slice(2);
-  if (args.length !== 2) {
-    console.error('Il faut 2 arguments: le chemin vers le dossier des fonctions et le chemin vers le dossier de recherche.');
-    process.exit(1);
-  }
-
-  const functionsFolderPath = path.resolve(args[0]);
-  const searchFolderPath = path.resolve(args[1]);
+export function searchFunctionsNotUsedInDirectory(searchFolderPath, functionsFolderPath) {
   const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPath);
   const results = new Map();
   let n = 0;
@@ -98,7 +90,4 @@ function main() {
     }
   });
   console.log(`Il y a ${n} fonctions non utilisées dans le dossier ${searchFolderPath}:`)
-  // console.table(results);
 }
-
-main();
