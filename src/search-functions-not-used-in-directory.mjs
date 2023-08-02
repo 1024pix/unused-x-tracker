@@ -1,15 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { parse } from '@babel/parser';
+import {parse} from '@babel/parser';
 import _traverse from '@babel/traverse';
+
 const traverse = _traverse.default;
 
 function getAllFilePathsInDirectory(dirPath) {
-  const files = fs.readdirSync(dirPath, { recursive: true });
+  const files = fs.readdirSync(dirPath, {recursive: true});
   return files
     .filter((file) => {
       const filePath = path.join(dirPath, file);
-      return fs.statSync(filePath).isFile() && path.extname(filePath) === '.js'
+      return fs.statSync(filePath).isFile() && path.extname(filePath) === '.js';
     })
     .map((file) => path.join(dirPath, file));
 }
@@ -36,7 +37,7 @@ function getExportedFunctionsInFile(filePath) {
     ExportNamedDeclaration(nodePath) {
       if (nodePath.node.specifiers) {
         for (const specifier of nodePath.node.specifiers) {
-          exportedFunctions.push({ fileName: fileNameToCamelCase, functionName: specifier.exported.name });
+          exportedFunctions.push({fileName: fileNameToCamelCase, functionName: specifier.exported.name});
         }
       }
     },
@@ -45,12 +46,12 @@ function getExportedFunctionsInFile(filePath) {
   return exportedFunctions;
 }
 
-function isCalledInDirectory(dirPath, { functionName, fileName }) {
+function isCalledInDirectory(dirPath, {functionName, fileName}) {
   const filePaths = getAllFilePathsInDirectory(dirPath);
-  return filePaths.some((filePath) => isCalledInFile(filePath, { functionName, fileName }));
+  return filePaths.some((filePath) => isCalledInFile(filePath, {functionName, fileName}));
 }
 
-function isCalledInFile(filePath, { fileName, functionName }) {
+function isCalledInFile(filePath, {fileName, functionName}) {
   const code = fs.readFileSync(filePath, 'utf-8');
   const ast = parse(code, {
     sourceType: 'module',
@@ -78,8 +79,8 @@ export function searchFunctionsNotUsedInDirectory(searchFolderPath, functionsFol
   const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPath);
   const results = new Map();
   let n = 0;
-  exportedFunctions.forEach(({ fileName, functionName }) => {
-    const isCalled = isCalledInDirectory(searchFolderPath, { fileName, functionName });
+  exportedFunctions.forEach(({fileName, functionName}) => {
+    const isCalled = isCalledInDirectory(searchFolderPath, {fileName, functionName});
     if (!isCalled) {
       n++;
       if (!results.has(fileName)) {
@@ -89,5 +90,5 @@ export function searchFunctionsNotUsedInDirectory(searchFolderPath, functionsFol
       }
     }
   });
-  console.log(`Il y a ${n} fonctions non utilisées dans le dossier ${searchFolderPath}:`)
+  console.log(`Il y a ${n} fonctions non utilisées dans le dossier ${searchFolderPath}:`);
 }

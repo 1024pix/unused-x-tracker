@@ -1,15 +1,21 @@
 {
-  "name": "ast-explorer",
+  "name": "unused_x_tracker",
   "version": "1.0.0",
   "description": "",
-  "main": "bin/main.mjs",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "1024pix",
   "license": "AGPL-3.0-or-later",
+  "main": "bin/main.mjs",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "@babel/parser": "^7.22.7",
     "@babel/traverse": "^7.22.8"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.40.0",
+    "eslint": "^8.46.0"
   }
 }
