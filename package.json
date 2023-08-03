@@ -1,10 +1,11 @@
 {
   "name": "unused_x_tracker",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "author": "1024pix",
   "license": "AGPL-3.0-or-later",
-  "main": "bin/main.mjs",
+  "main": "bin/main.js",
   "source": "index.html",
   "scripts": {
     "start": "parcel index.html",

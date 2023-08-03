@@ -17,7 +17,7 @@ async function displayLastRun() {
       {
         data: 'functions',
         title: 'Functions',
-        render(data, type, row) {
+        render(data, type) {
           return type === 'display' ? data.join('<br>') : data
         },
       },
