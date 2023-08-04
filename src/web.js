@@ -10,7 +10,7 @@ async function displayLastRun() {
 
   table = new DataTable('#rawResult', {
     paging: false,
-    searching: false,
+    searching: true,
     info: false,
     columns: [
       { data: 'fileName', title: 'Repositories' },
