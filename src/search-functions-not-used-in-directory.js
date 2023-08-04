@@ -1,16 +1,24 @@
 import fs from 'node:fs'
-import path from 'node:path'
+import { mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { basename, extname, join, sep } from 'node:path'
+import process from 'node:process'
 import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
+import simpleGit from 'simple-git'
 
 const traverse = _traverse.default
 const __dirname = new URL('.', import.meta.url).pathname
 
-export function searchFunctionsNotUsedInDirectory(searchFolderPath, functionsFolderPath) {
-  const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPath)
+export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath }) {
+  const clonedRepositoryPath = await cloneRepository(repository, simpleGit(), process.env)
+  const functionsFolderPathInClonedRepository = join(clonedRepositoryPath, functionsFolderPath)
+  const searchFolderPathInClonedRepository = join(clonedRepositoryPath, searchFolderPath)
+
+  const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPathInClonedRepository)
   const result = []
   exportedFunctions.forEach(({ fileName, functionName }) => {
-    const isCalled = isCalledInDirectory(searchFolderPath, { fileName, functionName })
+    const isCalled = isCalledInDirectory(searchFolderPathInClonedRepository, { fileName, functionName })
     if (!isCalled) {
       const currentFile = result.find(r => r.fileName === fileName)
       if (currentFile)
@@ -23,6 +31,18 @@ export function searchFunctionsNotUsedInDirectory(searchFolderPath, functionsFol
   saveResult(result, searchFolderPath, functionsFolderPath)
 }
 
+export async function cloneRepository(repository, simpleGit, env) {
+  const tempRepositoryPath = await mkdtemp(`${tmpdir()}${sep}`)
+  await simpleGit.clone(replaceRepositoryVariablesWithEnvVariables(repository, env), tempRepositoryPath, { '--depth': 1 })
+  return tempRepositoryPath
+}
+
+export function replaceRepositoryVariablesWithEnvVariables(repository, variables) {
+  return Object.keys(variables).reduce((memo, key) => {
+    return memo.replaceAll(`$${key}`, variables[key])
+  }, repository)
+}
+
 function getAllExportedFunctionsInDirectory(dirPath) {
   const filePaths = getAllFilePathsInDirectory(dirPath)
   return filePaths.flatMap(filePath => getExportedFunctionsInFile(filePath))
@@ -32,10 +52,10 @@ function getAllFilePathsInDirectory(dirPath) {
   const files = fs.readdirSync(dirPath, { recursive: true })
   return files
     .filter((file) => {
-      const filePath = path.join(dirPath, file)
-      return fs.statSync(filePath).isFile() && path.extname(filePath) === '.js'
+      const filePath = join(dirPath, file)
+      return fs.statSync(filePath).isFile() && extname(filePath) === '.js'
     })
-    .map(file => path.join(dirPath, file))
+    .map(file => join(dirPath, file))
 }
 
 function getExportedFunctionsInFile(filePath) {
@@ -44,7 +64,7 @@ function getExportedFunctionsInFile(filePath) {
     sourceType: 'module',
   })
 
-  const fileName = path.basename(filePath, '.js')
+  const fileName = basename(filePath, '.js')
   let fileNameToCamelCase = fileName.replace(/-([a-z])/g, g => g[1].toUpperCase())
   if (!fileNameToCamelCase.endsWith('Repository'))
     fileNameToCamelCase += 'Repository'
@@ -91,12 +111,12 @@ function isCalledInFile(filePath, { fileName, functionName }) {
 }
 
 function saveResult(result, searchFolderPath, functionsFolderPath) {
-  const fileName = `last-run-${path.basename(searchFolderPath)}-for-${path.basename(functionsFolderPath)}.json`
-  const filePath = path.join(__dirname, '../data', fileName)
+  const fileName = `last-run-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
+  const filePath = join(__dirname, '../data', fileName)
   fs.writeFileSync(filePath, JSON.stringify(result))
 
-  const historyFileName = `history-${path.basename(searchFolderPath)}-for-${path.basename(functionsFolderPath)}.json`
-  const historyFilePath = path.join(__dirname, '../data', historyFileName)
+  const historyFileName = `history-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
+  const historyFilePath = join(__dirname, '../data', historyFileName)
   const history = fs.existsSync(historyFilePath) ? JSON.parse(fs.readFileSync(historyFilePath, 'utf-8')) : []
   const notUsedFunctions = result.flatMap(r => r.functions).length
   fs.writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedFunctions }]))

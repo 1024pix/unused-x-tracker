@@ -12,19 +12,23 @@
     "build": "parcel build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=test mocha tests"
   },
   "dependencies": {
     "@babel/parser": "^7.22.7",
-    "@babel/traverse": "^7.22.8"
+    "@babel/traverse": "^7.22.8",
+    "simple-git": "^3.19.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.40.0",
     "@parcel/transformer-sass": "^2.9.3",
     "bootstrap": "^5.3.1",
+    "chai": "^4.3.7",
     "chart.js": "^4.3.3",
     "datatables.net-bs": "^1.13.6",
     "eslint": "^8.46.0",
-    "parcel": "^2.9.3"
+    "mocha": "^10.2.0",
+    "parcel": "^2.9.3",
+    "sinon": "^15.2.0"
   }
 }
