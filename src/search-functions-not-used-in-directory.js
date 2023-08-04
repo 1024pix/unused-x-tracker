@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, extname, join, sep } from 'node:path'
@@ -10,7 +10,7 @@ import simpleGit from 'simple-git'
 const traverse = _traverse.default
 const __dirname = new URL('.', import.meta.url).pathname
 
-export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath }) {
+export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath, searchName }) {
   const clonedRepositoryPath = await cloneRepository(repository, simpleGit(), process.env)
   const functionsFolderPathInClonedRepository = join(clonedRepositoryPath, functionsFolderPath)
   const searchFolderPathInClonedRepository = join(clonedRepositoryPath, searchFolderPath)
@@ -28,7 +28,7 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
     }
   })
 
-  saveResult(result, searchFolderPath, functionsFolderPath)
+  saveResult({ result, searchName })
 }
 
 export async function cloneRepository(repository, simpleGit, env) {
@@ -110,13 +110,18 @@ function isCalledInFile(filePath, { fileName, functionName }) {
   return functionCalled
 }
 
-function saveResult(result, searchFolderPath, functionsFolderPath) {
-  const fileName = `last-run-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
-  const filePath = join(__dirname, '../data', fileName)
+function saveResult({ result, searchName }) {
+  const searchFolderPath = join(__dirname, '../data', searchName)
+
+  if (!existsSync(searchFolderPath))
+    mkdirSync(searchFolderPath)
+
+  const fileName = 'last-run.json'
+  const filePath = join(searchFolderPath, fileName)
   writeFileSync(filePath, JSON.stringify(result))
 
-  const historyFileName = `history-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
-  const historyFilePath = join(__dirname, '../data', historyFileName)
+  const historyFileName = 'history.json'
+  const historyFilePath = join(searchFolderPath, historyFileName)
   const history = existsSync(historyFilePath) ? JSON.parse(readFileSync(historyFilePath, 'utf-8')) : []
   const notUsedFunctions = result.flatMap(r => r.functions).length
   writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedFunctions }]))
