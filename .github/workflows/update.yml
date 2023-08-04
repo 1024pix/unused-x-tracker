@@ -21,8 +21,7 @@ jobs:
       - name: Install packages
         run: npm ci
       - name: Update data for unused-repositories-functions
-        run: |
-          node bin/main.js https://github.com/1024pix/pix ./api/lib/infrastructure/repositories ./api/lib unused-repositories-functions
+        run: node bin/main.js
       - name: Commit update
         run: |
           git config user.name 'Unused X tracker'

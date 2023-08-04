@@ -1,8 +1,27 @@
 import DataTable from 'datatables.net-bs'
 import 'datatables.net-bs/css/dataTables.bootstrap.css'
-import lastRun from '../data/last-run-usecases-for-repositories.json'
+import lastRun from '../data/unused-repositories-functions-in-lib/last-run.json'
 
 let table
+
+function displayNav(features) {
+  const nav = document.getElementById('nav')
+  features.forEach((feature) => {
+    const li = document.createElement('li')
+    li.classList.add('nav-item')
+    const link = document.createElement('a')
+    link.classList.add('nav-link', 'd-flex')
+    const line = feature
+    link.setAttribute('href', `#${line}`)
+    link.dataset.line = line
+    link.addEventListener('click', (e) => {
+      displayResult({ repository, path })
+      selectButton({ repository, path })
+    })
+    li.appendChild(link)
+    nav.appendChild(li)
+  })
+}
 
 async function displayLastRun() {
   if (table)
@@ -13,7 +32,7 @@ async function displayLastRun() {
     searching: true,
     info: false,
     columns: [
-      { data: 'fileName', title: 'Repositories' },
+      { data: 'callName', title: 'CallName' },
       {
         data: 'functions',
         title: 'Functions',

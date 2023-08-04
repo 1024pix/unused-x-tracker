@@ -1,20 +1,23 @@
-import process from 'node:process'
+import { basename } from 'node:path'
 import { searchFunctionsNotUsedInDirectory } from '../src/search-functions-not-used-in-directory.js'
 
 async function main() {
-  const args = process.argv.slice(2)
+  const repository = 'https://github.com/1024pix/pix'
 
-  if (args.length !== 4) {
-    console.error('Il faut 4 arguments: le repository, le chemin vers le dossier des fonctions, le chemin vers le dossier de recherche, et le nom de la recherche')
-    process.exit(1)
-  }
+  await searchFunctionsNotUsedInDirectory({
+    repository,
+    searchFolderPath: './api/lib/',
+    functionsFolderPath: './api/lib/infrastructure/repositories',
+    searchName: 'unused-repositories-functions-in-lib',
+    computeCallName: ({ filePath }) => {
+      const fileName = basename(filePath, '.js')
+      let fileNameToCamelCase = fileName.replace(/-([a-z])/g, g => g[1].toUpperCase())
+      if (!fileNameToCamelCase.endsWith('Repository'))
+        fileNameToCamelCase += 'Repository'
 
-  const repository = args[0]
-  const functionsFolderPath = args[1]
-  const searchFolderPath = args[2]
-  const searchName = args[3]
-
-  await searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath, searchName })
+      return fileNameToCamelCase
+    },
+  })
 }
 
 main()
