@@ -1,0 +1,32 @@
+name: Update data
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install packages
+        run: npm ci
+      - name: Update data for unused-repositories-functions
+        run: |
+          node bin/main.js https://github.com/1024pix/pix ./api/lib/infrastructure/repositories ./api/lib unused-repositories-functions
+      - name: Commit update
+        run: |
+          git config user.name 'Unused X tracker'
+          git config user.email 'dependency-drift-tracker@users.noreply.github.com'
+          git add data
+          git commit --message 'Update data'
+          git push
