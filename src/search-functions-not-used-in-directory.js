@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, extname, join, sep } from 'node:path'
@@ -49,17 +49,17 @@ function getAllExportedFunctionsInDirectory(dirPath) {
 }
 
 function getAllFilePathsInDirectory(dirPath) {
-  const files = fs.readdirSync(dirPath, { recursive: true })
+  const files = readdirSync(dirPath, { recursive: true })
   return files
     .filter((file) => {
       const filePath = join(dirPath, file)
-      return fs.statSync(filePath).isFile() && extname(filePath) === '.js'
+      return statSync(filePath).isFile() && extname(filePath) === '.js'
     })
     .map(file => join(dirPath, file))
 }
 
 function getExportedFunctionsInFile(filePath) {
-  const code = fs.readFileSync(filePath, 'utf-8')
+  const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
   })
@@ -88,7 +88,7 @@ function isCalledInDirectory(dirPath, { functionName, fileName }) {
 }
 
 function isCalledInFile(filePath, { fileName, functionName }) {
-  const code = fs.readFileSync(filePath, 'utf-8')
+  const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
     plugins: ['importAssertions'],
@@ -113,11 +113,11 @@ function isCalledInFile(filePath, { fileName, functionName }) {
 function saveResult(result, searchFolderPath, functionsFolderPath) {
   const fileName = `last-run-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
   const filePath = join(__dirname, '../data', fileName)
-  fs.writeFileSync(filePath, JSON.stringify(result))
+  writeFileSync(filePath, JSON.stringify(result))
 
   const historyFileName = `history-${basename(searchFolderPath)}-for-${basename(functionsFolderPath)}.json`
   const historyFilePath = join(__dirname, '../data', historyFileName)
-  const history = fs.existsSync(historyFilePath) ? JSON.parse(fs.readFileSync(historyFilePath, 'utf-8')) : []
+  const history = existsSync(historyFilePath) ? JSON.parse(readFileSync(historyFilePath, 'utf-8')) : []
   const notUsedFunctions = result.flatMap(r => r.functions).length
-  fs.writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedFunctions }]))
+  writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedFunctions }]))
 }
