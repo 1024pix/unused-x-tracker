@@ -18,6 +18,16 @@ async function main() {
       return fileNameToCamelCase
     },
   })
+
+  await searchFunctionsNotUsedInDirectory({
+    repository,
+    searchFolderPath: './api/lib/application',
+    functionsFolderPath: './api/lib/domain/usecases',
+    searchName: 'unused-usecases',
+    computeCallName: () => {
+      return 'usecases'
+    },
+  })
 }
 
 main()
