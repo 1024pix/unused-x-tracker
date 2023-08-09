@@ -1,6 +1,6 @@
 import DataTable from 'datatables.net-bs'
 import 'datatables.net-bs/css/dataTables.bootstrap.css'
-import lastRun from '../data/unused-repositories-functions-in-lib/last-run.json'
+import * as data from '../data/**/*.json'
 
 let table
 
@@ -14,16 +14,26 @@ function displayNav(features) {
     const line = feature
     link.setAttribute('href', `#${line}`)
     link.dataset.line = line
+    link.textContent = feature
     link.addEventListener('click', (e) => {
-      displayResult({ repository, path })
-      selectButton({ repository, path })
+      displayResult(feature)
+      selectButton(feature)
     })
     li.appendChild(link)
     nav.appendChild(li)
   })
 }
 
-async function displayLastRun() {
+function selectButton(feature) {
+  const links = document.querySelectorAll('[data-line]')
+  links.forEach((link) => {
+    link.classList.remove('active')
+  })
+  const link = document.querySelector(`[data-line="${feature}"]`)
+  link.classList.add('active')
+}
+
+async function displayLastRun(data) {
   if (table)
     table.destroy()
 
@@ -41,12 +51,26 @@ async function displayLastRun() {
         },
       },
     ],
-    data: lastRun,
+    data,
   })
 }
 
+async function displayResult(feature) {
+  await displayLastRun(data[feature]['last-run'])
+}
+
 function main() {
-  displayLastRun()
+  displayNav(Object.keys(data))
+  let selectedFeature = Object.keys(data)[0]
+  if (location.hash.length > 0) {
+    const hash = location.hash.slice(1)
+    Object.keys(data).forEach((feature) => {
+      if (feature === hash)
+        selectedFeature = feature
+    })
+  }
+  displayResult(selectedFeature)
+  selectButton(selectedFeature)
 }
 
 main()
