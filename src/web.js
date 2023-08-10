@@ -15,7 +15,7 @@ function displayNav(features) {
     link.setAttribute('href', `#${line}`)
     link.dataset.line = line
     link.textContent = feature
-    link.addEventListener('click', (e) => {
+    link.addEventListener('click', () => {
       displayResult(feature)
       selectButton(feature)
     })
@@ -72,11 +72,12 @@ function displaySummary(history) {
 }
 
 function main() {
-  displayNav(Object.keys(data))
-  let selectedFeature = Object.keys(data)[0]
+  const features = Object.keys(data)
+  displayNav(features)
+  let selectedFeature = features[0]
   if (location.hash.length > 0) {
     const hash = location.hash.slice(1)
-    Object.keys(data).forEach((feature) => {
+    features.forEach((feature) => {
       if (feature === hash)
         selectedFeature = feature
     })
