@@ -30,6 +30,7 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
   })
 
   saveResult({ result, searchName })
+  await commitChange(simpleGit())
 }
 
 export async function cloneRepository(repository, simpleGit, env) {
@@ -122,4 +123,11 @@ function saveResult({ result, searchName }) {
   const history = existsSync(historyFilePath) ? JSON.parse(readFileSync(historyFilePath, 'utf-8')) : []
   const notUsedFunctions = result.flatMap(r => r.functions).length
   writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedFunctions }]))
+}
+
+export async function commitChange(simpleGit) {
+  await simpleGit.addConfig('user.name', 'Dependency drift tracker')
+  await simpleGit.addConfig('user.email', 'dependency-drift-tracker@users.noreply.github.com')
+  await simpleGit.add('data')
+  await simpleGit.commit('Update data')
 }
