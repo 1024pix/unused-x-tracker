@@ -4,30 +4,34 @@ import { searchFunctionsNotUsedInDirectory } from '../src/search-functions-not-u
 async function main() {
   const repository = 'https://github.com/1024pix/pix'
 
-  await searchFunctionsNotUsedInDirectory({
-    repository,
-    searchFolderPath: './api/lib/',
-    functionsFolderPath: './api/lib/infrastructure/repositories',
-    searchName: 'unused-repositories-functions-in-lib',
-    computeCallName: ({ filePath }) => {
-      const fileName = basename(filePath, '.js')
-      let fileNameToCamelCase = fileName.replace(/-([a-z])/g, g => g[1].toUpperCase())
-      if (!fileNameToCamelCase.endsWith('Repository'))
-        fileNameToCamelCase += 'Repository'
+  const searches = [
+    {
+      repository,
+      searchFolderPath: './api/lib/',
+      functionsFolderPath: './api/lib/infrastructure/repositories',
+      searchName: 'unused-repositories-functions-in-lib',
+      computeCallName: ({ filePath }) => {
+        const fileName = basename(filePath, '.js')
+        let fileNameToCamelCase = fileName.replace(/-([a-z])/g, g => g[1].toUpperCase())
+        if (!fileNameToCamelCase.endsWith('Repository'))
+          fileNameToCamelCase += 'Repository'
 
-      return fileNameToCamelCase
+        return fileNameToCamelCase
+      },
     },
-  })
+    {
+      repository,
+      searchFolderPath: './api/lib/application',
+      functionsFolderPath: './api/lib/domain/usecases',
+      searchName: 'unused-usecases',
+      computeCallName: () => {
+        return 'usecases'
+      },
+    },
+  ]
 
-  await searchFunctionsNotUsedInDirectory({
-    repository,
-    searchFolderPath: './api/lib/application',
-    functionsFolderPath: './api/lib/domain/usecases',
-    searchName: 'unused-usecases',
-    computeCallName: () => {
-      return 'usecases'
-    },
-  })
+  for (const search of searches)
+    await searchFunctionsNotUsedInDirectory(search)
 }
 
 main()
