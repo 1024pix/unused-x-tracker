@@ -20,12 +20,5 @@ jobs:
           node-version: 20
       - name: Install packages
         run: npm ci
-      - name: Update data for unused-repositories-functions
+      - name: Update data
         run: node bin/main.js
-      - name: Commit update
-        run: |
-          git config user.name 'Unused X tracker'
-          git config user.email 'dependency-drift-tracker@users.noreply.github.com'
-          git add data
-          git commit --message 'Update data'
-          git push
