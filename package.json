@@ -5,7 +5,6 @@
   "description": "",
   "author": "1024pix",
   "license": "AGPL-3.0-or-later",
-  "main": "bin/main.js",
   "source": "index.html",
   "scripts": {
     "start": "parcel index.html",
