@@ -57,12 +57,18 @@ async function displayLastRun(data) {
 
 async function displayResult(feature) {
   displayTitle(feature)
+  displaySummary(data[feature].history.at(-1))
   await displayLastRun(data[feature]['last-run'])
 }
 
 function displayTitle(feature) {
   const title = document.getElementById('title')
   title.textContent = feature
+}
+
+function displaySummary(history) {
+  const result = document.getElementById('result')
+  result.textContent = history.notUsedFunctions
 }
 
 function main() {
