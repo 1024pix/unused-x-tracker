@@ -56,7 +56,13 @@ async function displayLastRun(data) {
 }
 
 async function displayResult(feature) {
+  displayTitle(feature)
   await displayLastRun(data[feature]['last-run'])
+}
+
+function displayTitle(feature) {
+  const title = document.getElementById('title')
+  title.textContent = feature
 }
 
 function main() {
