@@ -63,6 +63,7 @@ function getExportedFunctionsInFile(filePath) {
   const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
+    plugins: ['importAssertions'],
   })
 
   const exportedFunctions = []
