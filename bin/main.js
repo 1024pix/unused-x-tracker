@@ -28,6 +28,20 @@ async function main() {
         return 'usecases'
       },
     },
+    {
+      repository,
+      searchFolderPath: './api/lib/domain',
+      functionsFolderPath: './api/lib/domain/services',
+      searchName: 'unused-services',
+      computeCallName: ({ filePath }) => {
+        const fileName = basename(filePath, '.js')
+        let fileNameToCamelCase = fileName.replace(/-([a-z])/g, g => g[1].toUpperCase())
+        if (!fileNameToCamelCase.endsWith('Service'))
+          fileNameToCamelCase += 'Service'
+
+        return fileNameToCamelCase
+      },
+    },
   ]
 
   for (const search of searches)
