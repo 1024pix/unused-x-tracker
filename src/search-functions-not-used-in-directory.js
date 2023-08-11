@@ -60,7 +60,7 @@ function getAllFilePathsInDirectory(dirPath) {
     .map(file => join(dirPath, file))
 }
 
-function getExportedFunctionsInFile(filePath) {
+export function getExportedFunctionsInFile(filePath) {
   const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
@@ -73,6 +73,10 @@ function getExportedFunctionsInFile(filePath) {
       if (nodePath.node.specifiers) {
         for (const specifier of nodePath.node.specifiers)
           exportedFunctions.push({ filePath, functionName: specifier.exported.name })
+      }
+      if (nodePath.node.declaration) {
+        const functionName = nodePath.node.declaration.id.name
+        exportedFunctions.push({ filePath, functionName })
       }
     },
   })

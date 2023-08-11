@@ -1,11 +1,15 @@
+import { join } from 'node:path'
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
 import sinon from 'sinon'
 import {
   cloneRepository,
   commitChange,
+  getExportedFunctionsInFile,
   replaceRepositoryVariablesWithEnvVariables,
 } from '../src/search-functions-not-used-in-directory.js'
+
+const __dirname = new URL('.', import.meta.url).pathname
 
 describe('search-functions-not-used-in-directory', () => {
   describe('#cloneRepository', () => {
@@ -69,6 +73,28 @@ describe('search-functions-not-used-in-directory', () => {
       expect(simpleGit.addConfig.calledTwice).to.be.true
       expect(simpleGit.add.calledWith('data')).to.be.true
       expect(simpleGit.commit.calledWith('Update data')).to.be.true
+    })
+  })
+
+  describe('#getExpordedFunctionsInFile', () => {
+    it('should return the exported functions in a given filePath', () => {
+      const filePath = join(__dirname, './sample/get-exported-functions-in-file/exported-functions.js')
+
+      const result = getExportedFunctionsInFile(filePath)
+
+      expect(result).to.deep.equal([
+        { filePath, functionName: 'a' },
+        { filePath, functionName: 'b' },
+        { filePath, functionName: 'c' },
+      ])
+    })
+
+    it('should return an empty array if no function is exported', () => {
+      const filePath = join(__dirname, './sample/get-exported-functions-in-file/no-exported-functions.js')
+
+      const result = getExportedFunctionsInFile(filePath)
+
+      expect(result).to.deep.equal([])
     })
   })
 })
