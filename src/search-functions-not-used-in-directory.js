@@ -10,7 +10,7 @@ import simpleGit from 'simple-git'
 const traverse = _traverse.default
 const __dirname = new URL('.', import.meta.url).pathname
 
-export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath, computeCallName, searchName }) {
+export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath, computeCallNames, searchName }) {
   const clonedRepositoryPath = await cloneRepository(repository, simpleGit(), process.env)
   const functionsFolderPathInClonedRepository = join(clonedRepositoryPath, functionsFolderPath)
   const searchFolderPathInClonedRepository = join(clonedRepositoryPath, searchFolderPath)
@@ -18,14 +18,14 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
   const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPathInClonedRepository)
   const result = []
   exportedFunctions.forEach(({ filePath, functionName }) => {
-    const callName = computeCallName({ filePath })
-    const isCalled = isCalledInDirectory(searchFolderPathInClonedRepository, { callName, functionName })
+    const callNames = computeCallNames({ filePath })
+    const isCalled = isCalledInDirectory(searchFolderPathInClonedRepository, { callNames, functionName })
     if (!isCalled) {
-      const currentFile = result.find(r => r.callName === callName)
+      const currentFile = result.find(r => JSON.stringify(r.callNames) === JSON.stringify(callNames))
       if (currentFile)
         currentFile.functions.push(functionName)
       else
-        result.push({ callName, functions: [functionName] })
+        result.push({ callNames, functions: [functionName] })
     }
   })
 
@@ -107,19 +107,17 @@ function isFunction(ast, identifierName) {
   return isFunction
 }
 
-function isCalledInDirectory(dirPath, { callName, functionName }) {
+function isCalledInDirectory(dirPath, { callNames, functionName }) {
   const filePaths = getAllFilePathsInDirectory(dirPath)
-  return filePaths.some(filePath => isCalledInFile(filePath, { callName, functionName }))
+  return filePaths.some(filePath => isCalledInFile(filePath, { callNames, functionName }))
 }
 
-export function isCalledInFile(filePath, { callName, functionName }) {
+export function isCalledInFile(filePath, { callNames, functionName }) {
   const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
     plugins: ['importAssertions'],
   })
-
-  const isNestedCallName = callName.includes('.')
 
   let functionCalled = false
   traverse(ast, {
@@ -129,10 +127,10 @@ export function isCalledInFile(filePath, { callName, functionName }) {
       if (callee.type === 'MemberExpression' && callee.property.name === functionName) {
         let nodeCallName = callee.object.name
         const isNestedCall = Boolean(callee.object.object)
-        if (isNestedCallName && isNestedCall)
+        if (isNestedCall)
           nodeCallName = `${callee.object.object.name}.${callee.object.property.name}`
 
-        if (callName === nodeCallName)
+        if (callNames.includes(nodeCallName))
           functionCalled = true
       }
     },

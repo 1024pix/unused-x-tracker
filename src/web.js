@@ -42,17 +42,18 @@ async function displayLastRun(data) {
     searching: true,
     info: false,
     columns: [
-      { data: 'callName', title: 'CallName' },
-      {
-        data: 'functions',
-        title: 'Functions',
-        render(data, type) {
-          return type === 'display' ? data.join('<br>') : data
-        },
-      },
+      { data: 'callNames', title: 'CallName', render: renderStringArray },
+      { data: 'functions', title: 'Functions', render: renderStringArray },
     ],
     data,
   })
+}
+
+function renderStringArray(data, type) {
+  if (type !== 'display')
+    return data
+
+  return data.join('<br>')
 }
 
 async function displayResult(feature) {
