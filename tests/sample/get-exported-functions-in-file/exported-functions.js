@@ -6,8 +6,11 @@ function b() {
   return 'b'
 }
 
-export { a, b }
+const c = () => 'c'
+const d = function () {}
 
-export function c() {
-  return 'c'
+export { a, b, c, d }
+
+export function e() {
+  return 'e'
 }

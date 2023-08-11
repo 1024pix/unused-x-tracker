@@ -70,12 +70,15 @@ export function getExportedFunctionsInFile(filePath) {
   const exportedFunctions = []
   traverse(ast, {
     ExportNamedDeclaration(nodePath) {
-      if (nodePath.node.specifiers) {
-        for (const specifier of nodePath.node.specifiers)
-          exportedFunctions.push({ filePath, functionName: specifier.exported.name })
+      const node = nodePath.node
+      if (node.specifiers.length !== 0) {
+        for (const specifier of node.specifiers) {
+          if (isFunction(ast, specifier.exported.name))
+            exportedFunctions.push({ filePath, functionName: specifier.exported.name })
+        }
       }
-      if (nodePath.node.declaration) {
-        const functionName = nodePath.node.declaration.id.name
+      if (node.declaration && node.declaration.type === 'FunctionDeclaration') {
+        const functionName = node.declaration.id.name
         exportedFunctions.push({ filePath, functionName })
       }
     },
@@ -84,28 +87,54 @@ export function getExportedFunctionsInFile(filePath) {
   return exportedFunctions
 }
 
+function isFunction(ast, identifierName) {
+  let isFunction = false
+  traverse(ast, {
+    FunctionDeclaration(nodePath) {
+      const node = nodePath.node
+      if (node.id.name === identifierName)
+        isFunction = true
+    },
+  })
+  traverse(ast, {
+    VariableDeclarator(nodePath) {
+      const node = nodePath.node
+      if (node.id.name === identifierName
+        && (node.init.type === 'ArrowFunctionExpression' || node.init.type === 'FunctionExpression'))
+        isFunction = true
+    },
+  })
+  return isFunction
+}
+
 function isCalledInDirectory(dirPath, { callName, functionName }) {
   const filePaths = getAllFilePathsInDirectory(dirPath)
   return filePaths.some(filePath => isCalledInFile(filePath, { callName, functionName }))
 }
 
-function isCalledInFile(filePath, { callName, functionName }) {
+export function isCalledInFile(filePath, { callName, functionName }) {
   const code = readFileSync(filePath, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
     plugins: ['importAssertions'],
   })
 
+  const isNestedCallName = callName.includes('.')
+
   let functionCalled = false
   traverse(ast, {
     CallExpression(nodePath) {
-      const node = nodePath.node
-      if (
-        node.callee.type === 'MemberExpression'
-        && node.callee.object.name === callName
-        && node.callee.property.name === functionName
-      )
-        functionCalled = true
+      const callee = nodePath.node.callee
+
+      if (callee.type === 'MemberExpression' && callee.property.name === functionName) {
+        let nodeCallName = callee.object.name
+        const isNestedCall = Boolean(callee.object.object)
+        if (isNestedCallName && isNestedCall)
+          nodeCallName = `${callee.object.object.name}.${callee.object.property.name}`
+
+        if (callName === nodeCallName)
+          functionCalled = true
+      }
     },
   })
 

@@ -6,6 +6,7 @@ import {
   cloneRepository,
   commitChange,
   getExportedFunctionsInFile,
+  isCalledInFile,
   replaceRepositoryVariablesWithEnvVariables,
 } from '../src/search-functions-not-used-in-directory.js'
 
@@ -86,6 +87,8 @@ describe('search-functions-not-used-in-directory', () => {
         { filePath, functionName: 'a' },
         { filePath, functionName: 'b' },
         { filePath, functionName: 'c' },
+        { filePath, functionName: 'd' },
+        { filePath, functionName: 'e' },
       ])
     })
 
@@ -95,6 +98,56 @@ describe('search-functions-not-used-in-directory', () => {
       const result = getExportedFunctionsInFile(filePath)
 
       expect(result).to.deep.equal([])
+    })
+
+    it('should return an empty array if only variable is exported', () => {
+      const filePath = join(__dirname, './sample/get-exported-functions-in-file/exported-variables.js')
+
+      const result = getExportedFunctionsInFile(filePath)
+
+      expect(result).to.deep.equal([])
+    })
+  })
+
+  describe('#isCalledInFile', () => {
+    describe('when the function is called in the file', () => {
+      it('should return true', () => {
+        const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+
+        const result = isCalledInFile(filePath, { callName: 'myFile', functionName: 'functionA' })
+
+        expect(result).to.be.true
+      })
+    })
+
+    describe('when the function is not called in the file', () => {
+      it('should return false', () => {
+        const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+
+        const result = isCalledInFile(filePath, { callName: 'myFile', functionName: 'functionC' })
+
+        expect(result).to.be.false
+      })
+    })
+
+    describe('when the function is called in the file with a different callName', () => {
+      it('should return false', () => {
+        const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+
+        const result = isCalledInFile(filePath, { callName: 'myOtherFile', functionName: 'functionA' })
+
+        expect(result).to.be.false
+      })
+    })
+
+    describe('when callName is prefix', () => {
+      it('should return true', () => {
+        const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+
+        const result = isCalledInFile(filePath, { callName: 'dependencies.myService', functionName: 'functionB' })
+
+        expect(result).to.be.true
+      })
     })
   })
 })
