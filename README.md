@@ -24,7 +24,6 @@ node bin/main.js
 
 ## À faire
 
-- [ ] Un graphique de l'évolution des historiques
 - [ ] Marquer des faux positifs pour les mettre dans un onglet à part
 - [ ] Pouvoir retirer un dossier de la recherche (ex: `tests`)
 - [ ] Pouvoir rechercher des classes qui ne sont pas utilisées

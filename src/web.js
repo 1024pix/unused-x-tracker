@@ -1,8 +1,10 @@
+import Chart from 'chart.js/auto'
 import DataTable from 'datatables.net-bs'
 import 'datatables.net-bs/css/dataTables.bootstrap.css'
 import * as data from '../data/**/*.json'
 
 let table
+let notUsedChart
 
 function displayNav(features) {
   const nav = document.getElementById('nav')
@@ -60,6 +62,7 @@ async function displayResult(feature) {
   displayTitle(feature)
   displaySummary(data[feature].history.at(-1))
   await displayLastRun(data[feature]['last-run'])
+  displayChart(data[feature].history)
 }
 
 function displayTitle(feature) {
@@ -70,6 +73,39 @@ function displayTitle(feature) {
 function displaySummary(history) {
   const result = document.getElementById('result')
   result.textContent = history.notUsedFunctions
+}
+
+function displayChart(history) {
+  const notUsedCtx = document.getElementById('notUsedChart')
+  if (notUsedChart)
+    notUsedChart.destroy()
+
+  const labels = history.map((d, i) => new Date(d.date).toLocaleDateString())
+  const baseColor = [0, 63, 92]
+  notUsedChart = new Chart(notUsedCtx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'line',
+          label: 'Not used functions',
+          data: history.map(d => d.notUsedFunctions),
+          backgroundColor: `rgba(${baseColor.join()}, 0.2)`,
+          borderColor: `rgba(${baseColor.join()}, 1)`,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          position: 'left',
+          beginAtZero: true,
+          suggestedMin: 0,
+        },
+      },
+    },
+  })
 }
 
 function main() {
