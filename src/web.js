@@ -73,7 +73,7 @@ function displaySummary(history) {
 }
 
 function main() {
-  const features = Object.keys(data)
+  const features = Object.keys(data).sort((a, b) => a.localeCompare(b))
   displayNav(features)
   let selectedFeature = features[0]
   if (location.hash.length > 0) {
