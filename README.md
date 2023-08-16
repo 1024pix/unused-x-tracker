@@ -5,11 +5,10 @@ Ce projet est un outil permettant de détecter les choses non utilisées dans un
 La seule fonctionnalité pour le moment est de détecter les fonctions exportées d'un dossier qui ne sont pas utilisées
 dans un autre dossier.
 
-Les usages liés à Pix sont de :
-- détecter les fonctions exportées par les fichiers de `repositories` qui ne sont pas utilisées
+Les usages liés à Pix sont de détecter :
+- les fonctions exportées par les fichiers de `repositories` qui ne sont pas utilisées
 ni dans le dossier `domain`
-- détecter les use-cases qui ne sont pas utilisés.
-
+- les use-cases, services, serializers qui ne sont pas utilisés.
 
 ## Usage
 
@@ -22,3 +21,10 @@ npm ci
 ```
 node bin/main.js 
 ```
+
+## À faire
+
+- [ ] Un graphique de l'évolution des historiques
+- [ ] Marquer des faux positifs pour les mettre dans un onglet à part
+- [ ] Pouvoir retirer un dossier de la recherche (ex: `tests`)
+- [ ] Pouvoir rechercher des classes qui ne sont pas utilisées
