@@ -23,6 +23,6 @@ jobs:
         run: npm ci
       - name: Update data
         run: node bin/main.js
-      - name: Commit update
+      - name: Push update
         run: |
           git push
