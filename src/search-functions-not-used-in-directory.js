@@ -15,19 +15,25 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
   const functionsFolderPathInClonedRepository = join(clonedRepositoryPath, functionsFolderPath)
   const searchFolderPathInClonedRepository = join(clonedRepositoryPath, searchFolderPath)
 
-  const exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPathInClonedRepository)
-  const result = []
-  exportedFunctions.forEach(({ filePath, functionName }) => {
+  let exportedFunctions = getAllExportedFunctionsInDirectory(functionsFolderPathInClonedRepository)
+  exportedFunctions = exportedFunctions.map(({ filePath, functionName }) => {
     const callNames = computeCallNames({ filePath })
-    const isCalled = isCalledInDirectory(searchFolderPathInClonedRepository, { callNames, functionName })
-    if (!isCalled) {
-      const currentFile = result.find(r => JSON.stringify(r.callNames) === JSON.stringify(callNames))
-      if (currentFile)
-        currentFile.functions.push(functionName)
-      else
-        result.push({ callNames, functions: [functionName] })
-    }
+    return { filePath, functionName, callNames }
   })
+
+  const searchFiles = getAllFilePathsInDirectory(searchFolderPathInClonedRepository)
+  for (const searchFile of searchFiles)
+    checkIfFunctionsAreCalledInFile({ searchFile, exportedFunctions })
+
+  const result = exportedFunctions.filter(({ isCalled }) => !isCalled).reduce((result, notCalledFunction) => {
+    const { callNames, functionName } = notCalledFunction
+    const existingResult = result.find(r => JSON.stringify(r.callNames) === JSON.stringify(callNames))
+    if (existingResult)
+      existingResult.functions.push(functionName)
+    else
+      result.push({ callNames, functions: [functionName] })
+    return result
+  }, [])
 
   saveResult({ result, searchName })
 }
@@ -106,36 +112,28 @@ function isFunction(ast, identifierName) {
   return isFunction
 }
 
-function isCalledInDirectory(dirPath, { callNames, functionName }) {
-  const filePaths = getAllFilePathsInDirectory(dirPath)
-  return filePaths.some(filePath => isCalledInFile(filePath, { callNames, functionName }))
-}
-
-export function isCalledInFile(filePath, { callNames, functionName }) {
-  const code = readFileSync(filePath, 'utf-8')
+export function checkIfFunctionsAreCalledInFile({ searchFile, exportedFunctions }) {
+  const code = readFileSync(searchFile, 'utf-8')
   const ast = parse(code, {
     sourceType: 'module',
     plugins: ['importAssertions'],
   })
 
-  let functionCalled = false
   traverse(ast, {
     CallExpression(nodePath) {
       const callee = nodePath.node.callee
-
-      if (callee.type === 'MemberExpression' && callee.property.name === functionName) {
+      if (callee.type === 'MemberExpression') {
         let nodeCallName = callee.object.name
         const isNestedCall = Boolean(callee.object.object)
         if (isNestedCall)
           nodeCallName = `${callee.object.object.name}.${callee.object.property.name}`
 
-        if (callNames.includes(nodeCallName))
-          functionCalled = true
+        exportedFunctions
+          .filter(({ callNames, functionName }) => functionName === callee.property.name && callNames.includes(nodeCallName))
+          .forEach(functions => functions.isCalled = true)
       }
     },
   })
-
-  return functionCalled
 }
 
 function saveResult({ result, searchName }) {

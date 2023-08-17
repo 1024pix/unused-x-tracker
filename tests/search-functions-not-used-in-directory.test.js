@@ -3,9 +3,9 @@ import { expect } from 'chai'
 import { describe, it } from 'mocha'
 import sinon from 'sinon'
 import {
+  checkIfFunctionsAreCalledInFile,
   cloneRepository,
   getExportedFunctionsInFile,
-  isCalledInFile,
   replaceRepositoryVariablesWithEnvVariables,
 } from '../src/search-functions-not-used-in-directory.js'
 
@@ -94,44 +94,48 @@ describe('search-functions-not-used-in-directory', () => {
     })
   })
 
-  describe('#isCalledInFile', () => {
+  describe('#checkIfFunctionsAreCalledInFile', () => {
     describe('when the function is called in the file', () => {
-      it('should return true', () => {
+      it('should mark has called function', () => {
         const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+        const functions = [{ callNames: ['myFile'], functionName: 'functionA' }]
 
-        const result = isCalledInFile(filePath, { callNames: ['myFile'], functionName: 'functionA' })
+        checkIfFunctionsAreCalledInFile({ searchFile: filePath, exportedFunctions: functions })
 
-        expect(result).to.be.true
+        expect(functions[0].isCalled).to.be.true
       })
     })
 
     describe('when the function is not called in the file', () => {
-      it('should return false', () => {
+      it('should not mark has called', () => {
         const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+        const functions = [{ callNames: ['myFile'], functionName: 'functionC' }]
 
-        const result = isCalledInFile(filePath, { callNames: ['myFile'], functionName: 'functionC' })
+        checkIfFunctionsAreCalledInFile({ searchFile: filePath, exportedFunctions: functions })
 
-        expect(result).to.be.false
+        expect(functions[0].isCalled).to.be.undefined
       })
     })
 
     describe('when the function is called in the file with a different callName', () => {
-      it('should return false', () => {
+      it('should not mark has called', () => {
         const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+        const functions = [{ callNames: ['myOtherFile'], functionName: 'functionA' }]
 
-        const result = isCalledInFile(filePath, { callNames: ['myOtherFile'], functionName: 'functionA' })
+        checkIfFunctionsAreCalledInFile({ searchFile: filePath, exportedFunctions: functions })
 
-        expect(result).to.be.false
+        expect(functions[0].isCalled).to.be.undefined
       })
     })
 
     describe('when callNames has prefix', () => {
-      it('should return true', () => {
+      it('should mark has called', () => {
         const filePath = join(__dirname, './sample/is-called-in-file/a.js')
+        const functions = [{ callNames: ['dependencies.myService'], functionName: 'functionB' }]
 
-        const result = isCalledInFile(filePath, { callNames: ['dependencies.myService'], functionName: 'functionB' })
+        checkIfFunctionsAreCalledInFile({ searchFile: filePath, exportedFunctions: functions })
 
-        expect(result).to.be.true
+        expect(functions[0].isCalled).to.be.true
       })
     })
   })
