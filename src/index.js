@@ -33,7 +33,7 @@ export async function main() {
       functionsFolderPath: './api/lib/domain/usecases',
       searchName: 'unused-usecases',
       computeCallNames: () => {
-        return ['usecases']
+        return ['usecases', 'dependencies.usecases']
       },
     },
     {
