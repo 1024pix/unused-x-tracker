@@ -1,6 +1,7 @@
 import { basename } from 'node:path'
 import simpleGit from 'simple-git'
 import { searchFunctionsNotUsedInDirectory } from '../src/search-functions-not-used-in-directory.js'
+import { searchClassesNotUsedInDirectory } from '../src/search-classes-not-used-in-directory.js'
 
 function computeCallNameToCamelCase({ filePath, prefix, suffix }) {
   const fileName = basename(filePath, '.js')
@@ -17,7 +18,7 @@ function computeCallNameToCamelCase({ filePath, prefix, suffix }) {
 export async function main() {
   const repository = 'https://github.com/1024pix/pix'
 
-  const searches = [
+  const searchesFunctions = [
     {
       repository,
       searchFolderPath: './api',
@@ -69,8 +70,28 @@ export async function main() {
     },
   ]
 
-  for (const search of searches)
+  for (const search of searchesFunctions)
     await searchFunctionsNotUsedInDirectory(search)
+
+  const searchesClasses = [
+    {
+      repository,
+      searchFolderPath: './api',
+      classesFolderPath: './api/lib/domain/models',
+      searchName: 'unused-models',
+      ignoreFiles: [/tests/],
+    },
+    {
+      repository,
+      searchFolderPath: './api',
+      classesFolderPath: './api/lib/domain/read-models',
+      searchName: 'unused-read-models',
+      ignoreFiles: [/tests/],
+    },
+  ]
+
+  for (const search of searchesClasses)
+    await searchClassesNotUsedInDirectory(search)
 
   await commitChange(simpleGit())
 }
