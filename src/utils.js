@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join, sep } from 'node:path'
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
+import { extname, join, sep } from 'node:path'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 
@@ -32,4 +32,14 @@ export function replaceRepositoryVariablesWithEnvVariables(repository, variables
   return Object.keys(variables).reduce((memo, key) => {
     return memo.replaceAll(`$${key}`, variables[key])
   }, repository)
+}
+
+export function getAllFilePathsInDirectory(dirPath, ignoreFiles = []) {
+  const files = readdirSync(dirPath, { recursive: true })
+  return files
+    .filter((file) => {
+      const filePath = join(dirPath, file)
+      return statSync(filePath).isFile() && extname(filePath) === '.js' && !ignoreFiles.some(ignoreFile => new RegExp(ignoreFile).test(filePath))
+    })
+    .map(file => join(dirPath, file))
 }

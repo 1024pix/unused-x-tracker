@@ -1,10 +1,10 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { extname, join } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import process from 'node:process'
 import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
 import simpleGit from 'simple-git'
-import { cloneRepository, saveResult } from './utils.js'
+import { cloneRepository, getAllFilePathsInDirectory, saveResult } from './utils.js'
 
 const traverse = _traverse.default
 
@@ -39,16 +39,6 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
 function getAllExportedFunctionsInDirectory(dirPath) {
   const filePaths = getAllFilePathsInDirectory(dirPath)
   return filePaths.flatMap(filePath => getExportedFunctionsInFile(filePath))
-}
-
-function getAllFilePathsInDirectory(dirPath, ignoreFiles = []) {
-  const files = readdirSync(dirPath, { recursive: true })
-  return files
-    .filter((file) => {
-      const filePath = join(dirPath, file)
-      return statSync(filePath).isFile() && extname(filePath) === '.js' && !ignoreFiles.some(ignoreFile => new RegExp(ignoreFile).test(filePath))
-    })
-    .map(file => join(dirPath, file))
 }
 
 export function getExportedFunctionsInFile(filePath) {

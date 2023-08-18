@@ -1,7 +1,7 @@
 import { describe, it } from 'mocha'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import { cloneRepository, replaceRepositoryVariablesWithEnvVariables } from '../src/utils.js'
+import { cloneRepository, getAllFilePathsInDirectory, replaceRepositoryVariablesWithEnvVariables } from '../src/utils.js'
 
 describe('utils', () => {
   describe('#cloneRepository', () => {
@@ -51,6 +51,26 @@ describe('utils', () => {
         const result = replaceRepositoryVariablesWithEnvVariables(repository, variables)
         expect(result).to.equal(expected)
       })
+    })
+  })
+
+  describe('#getAllFilePathsInDirectory', () => {
+    it('get all js file paths in directory with file in subdirectory', () => {
+      const result = getAllFilePathsInDirectory('./tests/sample/get-all-file-paths-in-directory')
+
+      expect(result).to.deep.equal([
+        'tests/sample/get-all-file-paths-in-directory/a.js',
+        'tests/sample/get-all-file-paths-in-directory/b.js',
+        'tests/sample/get-all-file-paths-in-directory/c/c.js',
+      ])
+    })
+
+    it('should not get files matched by ignoreFiles', () => {
+      const result = getAllFilePathsInDirectory('./tests/sample/get-all-file-paths-in-directory', [/a\.js/, /\/c\//])
+
+      expect(result).to.deep.equal([
+        'tests/sample/get-all-file-paths-in-directory/b.js',
+      ])
     })
   })
 })
