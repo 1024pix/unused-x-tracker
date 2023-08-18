@@ -10,7 +10,7 @@ import simpleGit from 'simple-git'
 const traverse = _traverse.default
 const __dirname = new URL('.', import.meta.url).pathname
 
-export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, functionsFolderPath, computeCallNames, searchName }) {
+export async function searchFunctionsNotUsedInDirectory({ repository, searchFolderPath, ignoreFiles, functionsFolderPath, computeCallNames, searchName }) {
   const clonedRepositoryPath = await cloneRepository(repository, simpleGit(), process.env)
   const functionsFolderPathInClonedRepository = join(clonedRepositoryPath, functionsFolderPath)
   const searchFolderPathInClonedRepository = join(clonedRepositoryPath, searchFolderPath)
@@ -21,7 +21,7 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
     return { filePath, functionName, callNames }
   })
 
-  const searchFiles = getAllFilePathsInDirectory(searchFolderPathInClonedRepository)
+  const searchFiles = getAllFilePathsInDirectory(searchFolderPathInClonedRepository, ignoreFiles)
   for (const searchFile of searchFiles)
     checkIfFunctionsAreCalledInFile({ searchFile, exportedFunctions })
 
@@ -55,12 +55,12 @@ function getAllExportedFunctionsInDirectory(dirPath) {
   return filePaths.flatMap(filePath => getExportedFunctionsInFile(filePath))
 }
 
-function getAllFilePathsInDirectory(dirPath) {
+function getAllFilePathsInDirectory(dirPath, ignoreFiles = []) {
   const files = readdirSync(dirPath, { recursive: true })
   return files
     .filter((file) => {
       const filePath = join(dirPath, file)
-      return statSync(filePath).isFile() && extname(filePath) === '.js'
+      return statSync(filePath).isFile() && extname(filePath) === '.js' && !ignoreFiles.some(ignoreFile => new RegExp(ignoreFile).test(filePath))
     })
     .map(file => join(dirPath, file))
 }

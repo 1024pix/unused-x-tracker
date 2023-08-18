@@ -20,36 +20,46 @@ export async function main() {
   const searches = [
     {
       repository,
-      searchFolderPath: './api/lib/',
+      searchFolderPath: './api',
       functionsFolderPath: './api/lib/infrastructure/repositories',
-      searchName: 'unused-repositories-functions-in-lib',
+      searchName: 'unused-repositories',
+      ignoreFiles: [/tests/],
       computeCallNames: ({ filePath }) => {
-        return [computeCallNameToCamelCase({ filePath, suffix: 'Repository' })]
+        return [
+          computeCallNameToCamelCase({ filePath, suffix: 'Repository' }),
+          computeCallNameToCamelCase({ filePath, suffix: 'Repository', prefix: 'dependencies' }),
+        ]
       },
     },
     {
       repository,
-      searchFolderPath: './api/lib/application',
+      searchFolderPath: './api',
       functionsFolderPath: './api/lib/domain/usecases',
       searchName: 'unused-usecases',
+      ignoreFiles: [/tests/],
       computeCallNames: () => {
         return ['usecases', 'dependencies.usecases']
       },
     },
     {
       repository,
-      searchFolderPath: './api/lib/domain',
+      searchFolderPath: './api',
       functionsFolderPath: './api/lib/domain/services',
       searchName: 'unused-services',
+      ignoreFiles: [/tests/],
       computeCallNames: ({ filePath }) => {
-        return [computeCallNameToCamelCase({ filePath, suffix: 'Service' })]
+        return [
+          computeCallNameToCamelCase({ filePath, suffix: 'Service' }),
+          computeCallNameToCamelCase({ filePath, suffix: 'Service', prefix: 'dependencies' }),
+        ]
       },
     },
     {
       repository,
-      searchFolderPath: './api/lib/application',
+      searchFolderPath: './api',
       functionsFolderPath: './api/lib/infrastructure/serializers/jsonapi',
       searchName: 'unused-serializers',
+      ignoreFiles: [/tests/],
       computeCallNames: ({ filePath }) => {
         return [
           computeCallNameToCamelCase({ filePath, suffix: 'Serializer' }),
@@ -69,5 +79,5 @@ export async function commitChange(simpleGit) {
   await simpleGit.addConfig('user.name', 'Dependency drift tracker')
   await simpleGit.addConfig('user.email', 'dependency-drift-tracker@users.noreply.github.com')
   await simpleGit.add('data')
-  await simpleGit.commit('Update data')
+  await simpleGit.commit('Update data', {})
 }
