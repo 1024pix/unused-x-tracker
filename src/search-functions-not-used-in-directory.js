@@ -33,7 +33,9 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
     return result
   }, [])
 
-  saveResult({ result, searchName })
+  const notUsedFunctions = result.flatMap(r => r.functions).length
+
+  saveResult({ result, notUsedCount: notUsedFunctions, searchName })
 }
 
 function getAllExportedFunctionsInDirectory(dirPath) {

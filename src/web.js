@@ -72,7 +72,7 @@ function displayTitle(feature) {
 
 function displaySummary(history) {
   const result = document.getElementById('result')
-  result.textContent = history.notUsedFunctions
+  result.textContent = history.notUsedCount
 }
 
 function displayChart(history) {
@@ -88,8 +88,8 @@ function displayChart(history) {
       datasets: [
         {
           type: 'line',
-          label: 'Not used functions',
-          data: history.map(d => d.notUsedFunctions),
+          label: 'Not used',
+          data: history.map(d => d.notUsedCount),
           backgroundColor: `rgba(${baseColor.join()}, 0.2)`,
           borderColor: `rgba(${baseColor.join()}, 1)`,
           borderWidth: 1,

@@ -30,7 +30,7 @@ export async function searchClassesNotUsedInDirectory({ repository, searchFolder
     return result
   }, [])
 
-  saveResult({ result, searchName })
+  saveResult({ result, notUsedCount: result.length, searchName })
 }
 
 function getAllExportedClassesInDirectory(dirPath) {
