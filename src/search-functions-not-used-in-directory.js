@@ -1,12 +1,10 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs'
-import { mkdtemp } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
-import { extname, join, sep } from 'node:path'
+import { extname, join } from 'node:path'
 import process from 'node:process'
 import { parse } from '@babel/parser'
 import _traverse from '@babel/traverse'
 import simpleGit from 'simple-git'
-import { saveResult } from './utils.js'
+import { cloneRepository, saveResult } from './utils.js'
 
 const traverse = _traverse.default
 
@@ -36,18 +34,6 @@ export async function searchFunctionsNotUsedInDirectory({ repository, searchFold
   }, [])
 
   saveResult({ result, searchName })
-}
-
-export async function cloneRepository(repository, simpleGit, env) {
-  const tempRepositoryPath = await mkdtemp(`${tmpdir()}${sep}`)
-  await simpleGit.clone(replaceRepositoryVariablesWithEnvVariables(repository, env), tempRepositoryPath, { '--depth': 1 })
-  return tempRepositoryPath
-}
-
-export function replaceRepositoryVariablesWithEnvVariables(repository, variables) {
-  return Object.keys(variables).reduce((memo, key) => {
-    return memo.replaceAll(`$${key}`, variables[key])
-  }, repository)
 }
 
 function getAllExportedFunctionsInDirectory(dirPath) {
