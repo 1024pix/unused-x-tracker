@@ -36,22 +36,28 @@ function selectButton(feature) {
 }
 
 async function displayLastRun(data) {
-  if (table)
+  if (table) {
     table.destroy()
+    const tableElement = document.querySelector('#rawResult')
+    tableElement.innerHTML = ''
+  }
+
+  const columns = Object.keys(data[0]).map(key => ({ data: key, title: key, render: renderStringArray }))
 
   table = new DataTable('#rawResult', {
     paging: false,
     searching: true,
     info: false,
-    columns: [
-      { data: 'callNames', title: 'CallName', render: renderStringArray },
-      { data: 'functions', title: 'Functions', render: renderStringArray },
-    ],
+    colReorder: true,
+    columns,
     data,
   })
 }
 
 function renderStringArray(data, type) {
+  if (!Array.isArray(data))
+    return data
+
   if (type !== 'display')
     return data
 
