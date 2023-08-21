@@ -20,7 +20,7 @@ export function saveResult({ result, notUsedCount, searchName }) {
   const history = existsSync(historyFilePath) ? JSON.parse(readFileSync(historyFilePath, 'utf-8')) : []
 
   const notUsedFunctions = result.flatMap(r => r.functions).length
-  writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsed }]))
+  writeFileSync(historyFilePath, JSON.stringify([...history, { date: new Date(), notUsedCount }]))
 }
 
 export async function cloneRepository(repository, simpleGit, env) {
