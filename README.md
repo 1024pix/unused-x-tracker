@@ -25,4 +25,3 @@ node bin/main.js
 ## À faire
 
 - [ ] Marquer des faux positifs pour les mettre dans un onglet à part
-- [ ] Pouvoir rechercher des classes qui ne sont pas utilisées
