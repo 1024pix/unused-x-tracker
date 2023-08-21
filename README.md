@@ -25,3 +25,4 @@ node bin/main.js
 ## À faire
 
 - [ ] Marquer des faux positifs pour les mettre dans un onglet à part
+- [ ] Ajouter dans la recherche de fonctions, l'usage sans import complet du fichier
