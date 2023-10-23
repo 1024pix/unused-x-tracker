@@ -1,1 +1,1 @@
-[{"class":"Authentication"},{"class":"BadgeAcquisition"},{"class":"CertificationContract"},{"class":"PartnerCertificationScoring"}]
+[{"class":"Authentication"},{"class":"BadgeAcquisition"},{"class":"CertificationContract"},{"class":"PartnerCertificationScoring"},{"class":"FlashAssessmentAlgorithmChallengesBetweenCompetencesRule"},{"class":"FlashAssessmentAlgorithmForcedCompetencesRule"},{"class":"FlashAssessmentAlgorithmNonAnsweredSkillsRule"},{"class":"FlashAssessmentAlgorithmOneQuestionPerTubeRule"},{"class":"FlashAssessmentAlgorithmPassageByAllCompetencesRule"}]
