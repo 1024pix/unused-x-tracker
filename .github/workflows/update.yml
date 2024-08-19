@@ -1,9 +1,6 @@
 name: Update data
 
 on:
-  schedule:
-    - cron: '0 7 * * 1'
-  # eslint-disable yml/no-empty-mapping-value
   workflow_dispatch:
 
 permissions:
